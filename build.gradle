@@ -7,11 +7,16 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5"
+        classpath "net.saliman:gradle-cobertura-plugin:2.5.0"
     }
 }
 
+apply plugin: 'war'
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
+apply plugin: "org.sonarqube"
+apply plugin: "net.saliman.cobertura"
 
 repositories {
     mavenCentral()
@@ -36,3 +41,19 @@ dependencies {
     testCompile('org.mockito:mockito-core:2.18.0')
 
 }
+
+sonarqube {
+ properties {
+ property "sonar.cobertura.reportPath" ,"/build/reports/cobertura/coverage.xml"
+ property "sonar.junit.reportsPath","build/reports/tests"
+ property "sonar.java.cobertura.reportPath","/build/reports/cobertura/coverage.xml"
+ property "sonar.java.coveragePlugin","cobertura"
+ }
+}
+
+cobertura {
+    coverageFormats = ['xml','html']
+}
+
+test.finalizedBy(project.tasks.cobertura)
+project.tasks["sonarqube"].dependsOn test
